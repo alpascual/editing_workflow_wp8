@@ -1,0 +1,287 @@
+﻿<phone:PhoneApplicationPage x:Class="EditingSample.MainPage"
+                            xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                            xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+                            xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+                            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                            mc:Ignorable="d"
+                            FontFamily="{StaticResource PhoneFontFamilyNormal}"
+                            FontSize="{StaticResource PhoneFontSizeNormal}"
+                            Foreground="{StaticResource PhoneForegroundBrush}"
+                            SupportedOrientations="Portrait"
+                            Orientation="Portrait"
+                            shell:SystemTray.IsVisible="True"
+                            xmlns:esri="clr-namespace:ESRI.ArcGIS.Client;assembly=ESRI.ArcGIS.Client"
+                            xmlns:esriToolkit="clr-namespace:ESRI.ArcGIS.Client.Toolkit;assembly=ESRI.ArcGIS.Client.Toolkit"
+                            xmlns:esriPrimitives="clr-namespace:ESRI.ArcGIS.Client.Toolkit.Primitives;assembly=ESRI.ArcGIS.Client.Toolkit">
+    <phone:PhoneApplicationPage.Resources>
+        <!-- Since Application Bar is changing based on context, the following resources were added. -->
+        <shell:ApplicationBar x:Name="HomeAppBar"
+                              IsVisible="True"
+                              IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="/Assets/Images/Add.png"
+                                            Click="AddIconButton_Click"
+                                            Text="Add" />
+            <shell:ApplicationBarIconButton  IsEnabled="False"
+                                             IconUri="/Assets/Images/save.png"
+                                             Text="Save"
+                                             Click="SaveIconButton_Click" />
+            <shell:ApplicationBarIconButton IsEnabled="False"
+                                            IconUri="/Assets/Images/Cancel.png"
+                                            Text="Cancel"
+                                            Click="CancelIconButton_Click" />
+        </shell:ApplicationBar>
+        <shell:ApplicationBar x:Name="AttachmentAppBar"
+                              IsVisible="True"
+                              IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IconUri="/Assets/Images/Add.png"
+                                            Click="AddAttachmentIconButton_Click"
+                                            Text="Add" />
+            <shell:ApplicationBarIconButton  IconUri="/Assets/Images/Home.png"
+                                             Text="Map"
+                                             Click="ShowMapIconButton_Click" />
+        </shell:ApplicationBar>
+        <shell:ApplicationBar x:Name="DataFormAppBar"
+                              IsVisible="True"
+                              IsMenuEnabled="True">
+            <shell:ApplicationBarIconButton IsEnabled="False"
+                                            IconUri="/Assets/Images/save.png"
+                                            Text="Save"
+                                            Click="ShowMapIconButton_Click" />
+            <shell:ApplicationBarIconButton IconUri="/Assets/Images/Cancel.png"
+                                            Text="Close"
+                                            Click="ShowMapIconButton_Click" />
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.Resources>
+    <Grid x:Name="LayoutRoot"
+          Background="Transparent">
+        <Grid.Resources>
+            <!-- Editor is usually defined at the XAML Resources to enable command binding through StaticResource. -->
+            <esri:Editor x:Key="MyEditor"
+                         Map="{Binding ElementName=MyMap}"
+                         LayerIDs="ThreatAreas"
+                         GeometryServiceUrl="http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer" />
+            <!-- ListBox.ItemTemplate is modified to display the Value part of a KeyValuePair. -->
+            <Style TargetType="ListBox">
+                <Setter Property="ItemTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Value}" />
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="ListBoxButtonStyle"
+                   TargetType="Button">
+                <Setter Property="Background"
+                        Value="White" />
+                <Setter Property="Foreground"
+                        Value="Black" />
+                <Setter Property="BorderThickness"
+                        Value="0" />
+                <Setter Property="MinHeight"
+                        Value="68" />
+            </Style>
+            <!-- Two InfoWindow Template is used here: 
+                 1: for existing features where object ID and attachments are available, and 
+                 2: for new features where object ID and attachments are NOT available yet.
+            -->
+            <DataTemplate x:Key="EditInfoWindowTemplate">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Object ID :  " />
+                        <TextBlock Text="{Binding Attributes[objectid]}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="1">
+                        <Button Content="Delete"
+                                Click="DeleteButton_Click" />
+                        <!-- Use Editor.EditVertices command if enabling for all editable GraphicsLayer
+                             instead of using click event.
+                        <Button Content="Edit Geometry"
+                                Command="{Binding EditVertices}"
+                                DataContext ="{StaticResource MyEditor}"/>
+                        -->
+                        <Button Content="Edit Geometry"
+                                Click="EditGeometryButton_Click" />
+                        <Button Content="Edit Attributes"
+                                Click="EditAttributesButton_Click" />
+                        <Button Content="Show Attachments"
+                                Click="AttachmentsButton_Click" />
+                    </StackPanel>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate x:Key="EditInfoWindowTemplateNewFeature">
+                <StackPanel Grid.Row="1">
+                    <Button Content="Delete"
+                            Click="DeleteButton_Click" />
+                    <Button Content="Edit Geometry"
+                            Click="EditGeometryButton_Click" />
+                    <Button Content="Edit Attributes"
+                            Click="EditAttributesButton_Click" />
+                </StackPanel>
+            </DataTemplate>
+        </Grid.Resources>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <StackPanel x:Name="TitlePanel"
+                    Grid.Row="0"
+                    Margin="12,17,0,28">
+            <TextBlock Text="Editing Sample"
+                       Style="{StaticResource PhoneTextNormalStyle}"
+                       Margin="12,0" />
+            <TextBlock Text="Incident Reporter"
+                       Margin="9,-7,0,0"
+                       Style="{StaticResource PhoneTextTitle1Style}" />
+        </StackPanel>
+        <Grid x:Name="ContentPanel"
+              Grid.Row="1"
+              Margin="12,0,12,0">
+            <esri:Map x:Name="MyMap"
+                      WrapAround="True"
+                      Extent="-13054165,3850112,-13027133,3863559">
+                <esri:ArcGISTiledMapServiceLayer Url="http://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer" />
+                <esri:FeatureLayer ID="ThreatAreas"
+                                   Url="http://sampleserver3.arcgisonline.com/ArcGIS/rest/services/HomelandSecurity/operations/FeatureServer/2"
+                                   AutoSave="False"
+                                   Mode="OnDemand"
+                                   ValidateEdits="True"
+                                   DisableClientCaching="True"
+                                   OutFields="objectid,incident_number,ftype,description"
+                                   PropertyChanged="FeatureLayer_PropertyChanged"
+                                   Initialized="FeatureLayer_Initialized"
+                                   MouseLeftButtonDown="FeatureLayer_MouseLeftButtonDown" />
+            </esri:Map>
+            <!-- This panel is used to enable adding new features by type using Editor.Add. -->
+            <Grid x:Name="TemplatePickerGrid"
+                  Background="Black"
+                  Visibility="Collapsed">
+                <ScrollViewer>
+                    <StackPanel x:Name="TemplatePicker" />
+                </ScrollViewer>
+            </Grid>
+            <!-- This panel is used for attribute editing, notice that Binding to editable fields is two-way. -->
+            <Grid x:Name="FeatureDataFormGrid"
+                  Background="Black"
+                  Visibility="Collapsed">
+                <ScrollViewer>
+                    <Grid x:Name="FeatureDataForm">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="ObjectID" />
+                        <TextBlock Text="{Binding Attributes[objectid]}"
+                                   Grid.Row="1" />
+                        <TextBlock Text="Incident #"
+                                   Grid.Row="3" />
+                        <TextBox Text="{Binding Attributes[incident_number], Mode=TwoWay}"
+                                 Grid.Row="4" />
+                        <TextBlock Text="Status"
+                                   Grid.Row="5" />
+                        <Button Click="EnableChoiceListButton_Click"
+                                Tag="Status"
+                                Style="{StaticResource ListBoxButtonStyle}"
+                                Content="{Binding ElementName=StatusLB, Path=SelectedItem.Value}"
+                                Grid.Row="6" />
+                        <TextBlock Text="Type"
+                                   Grid.Row="7" />
+                        <Button Click="EnableChoiceListButton_Click"
+                                Tag="FType"
+                                Style="{StaticResource ListBoxButtonStyle}"
+                                Content="{Binding ElementName=FTypeLB, Path=SelectedItem.Value}"
+                                Grid.Row="8" />
+                        <TextBlock Text="Description"
+                                   Grid.Row="9" />
+                        <TextBox Text="{Binding Attributes[description], Mode=TwoWay}"
+                                 Grid.Row="10" />
+                    </Grid>
+                </ScrollViewer>
+            </Grid>
+            <!-- This panel is used for previewing, deleting and adding attachments. 
+                 Operations that are executed at once, not delayed by FeatureLayer.AutoSave property -->
+            <Grid x:Name="AttachmentsGrid"
+                  Background="Black"
+                  Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock x:Name="AttachmentResult" />
+                <ScrollViewer Grid.Row="1">
+                    <ItemsControl x:Name="AttachmentsList"
+                                  Background="Black">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <HyperlinkButton TargetName="_blank"
+                                                     Content="{Binding Name}"
+                                                     NavigateUri="{Binding Uri}" />
+                                    <!-- NOTE: Use AttachmentInfo.Delete command if no confirmation dialog is necessary
+                                    <Button Command="{Binding Delete}"
+                                    -->
+                                    <Button Click="DeleteAttachmentButton_Click"
+                                            Grid.Column="1">
+                                        <Button.Content>
+                                            <Image Source="/Assets/Images/Delete.png" />
+                                        </Button.Content>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+            <!-- The InfoWindow enables feature to switch to edit mode by providing several options.
+                 For example: Delete, Edit Geometry, Edit Attributes, Edit Attachments. -->
+            <esriToolkit:InfoWindow x:Name="MyInfoWindow"
+                                    Padding="2"
+                                    CornerRadius="20"
+                                    Background="Black"
+                                    Map="{Binding ElementName=MyMap}"
+                                    ContentTemplate="{StaticResource EditInfoWindowTemplate}"
+                                    MouseLeftButtonUp="MyInfoWindow_MouseLeftButtonUp" />
+        </Grid>
+        <!-- This ChildPage is used to show choice list for fields that have domain or feature type information. -->
+        <esriPrimitives:ChildPage x:Name="ChoicesPage"
+                                  IsOpen="False"
+                                  Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <ListBox x:Name="StatusLB"
+                         SelectionChanged="ChoiceList_SelectionChanged"
+                         FontSize="34"
+                         Visibility="Collapsed" />
+                <ListBox x:Name="FTypeLB"
+                         SelectionChanged="ChoiceList_SelectionChanged"
+                         FontSize="34"
+                         Visibility="Collapsed" />
+                <Button Content="Close"
+                        Grid.Row="1"
+                        Click="CloseButtonClick" />
+            </Grid>
+        </esriPrimitives:ChildPage>
+    </Grid>
+</phone:PhoneApplicationPage>
