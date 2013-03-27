@@ -2,7 +2,7 @@
 
 This project contains the C# source code for an editing workflow example using ArcGIS Runtime SDK for Windows Phone.
 
-[![Image of sample app](https://raw.github.com/jNery/editing-workflow-wp8/master/editing-workflow-wp8.png")]
+[![Image of sample app](https://raw.github.com/jNery/editing_workflow_wp8/master/editing_workflow_wp8.png")]
 
 ## Instructions 
 
@@ -45,6 +45,6 @@ limitations under the License.
 
 A copy of the license is available in the repository's [license.txt]( https://raw.github.com/Esri/arcgis-samples-silverlight/master/license.txt) file.
 
-[](Esri Tags: ArcGIS Runtime SDK Windows Phone, Devsummit, 2013)
+[](Esri Tags: Devsummit, 2013)
 [](Esri Language: Silverlight C#)
 
