@@ -43,7 +43,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-A copy of the license is available in the repository's [license.txt]( https://raw.github.com/Esri/arcgis-samples-silverlight/master/license.txt) file.
+A copy of the license is available in the repository's [license.txt]( https://raw.github.com/jNery/editing_workflow_wp8/master/license.txt) file.
 
 [](Esri Tags: Devsummit, 2013)
 [](Esri Language: Silverlight C#)
